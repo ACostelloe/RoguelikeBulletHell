@@ -1,0 +1,82 @@
+{
+    "name": "cracked_bridge",
+    "biome": "lava",
+    "zone_type": "early_game",
+    "width": 20,
+    "height": 12,
+    "tiles": [
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "BBBBBBBBBBBBBBBBBBBB",
+        "B..................B",
+        "B..................B",
+        "B..................B",
+        "B..................B",
+        "B..................B",
+        "B..................B",
+        "BBBBBBBBBBBBBBBBBBBB"
+    ],
+    "legend": {
+        ".": "air",
+        "B": "bridge_cracked"
+    },
+    "decorations": [
+        {
+            "type": "lava_geyser",
+            "x": 5,
+            "y": 11,
+            "properties": {
+                "active": true,
+                "interval": 3.0
+            }
+        },
+        {
+            "type": "cracked_pillar",
+            "x": 15,
+            "y": 11,
+            "properties": {
+                "damage": 0.1
+            }
+        }
+    ],
+    "enemies": [
+        {
+            "type": "lava_slime",
+            "x": 8,
+            "y": 5,
+            "patrol_points": [
+                [6, 5],
+                [10, 5]
+            ]
+        },
+        {
+            "type": "fire_bat",
+            "x": 12,
+            "y": 3,
+            "patrol_points": [
+                [10, 3],
+                [14, 3],
+                [12, 2],
+                [12, 4]
+            ]
+        }
+    ],
+    "loot": [
+        {
+            "type": "fire_crystal",
+            "rarity": "common",
+            "x": 10,
+            "y": 5
+        }
+    ],
+    "events": [
+        "bridge_shake",
+        "lava_splash"
+    ],
+    "ambient_effects": {
+        "particles": ["embers", "smoke"],
+        "sounds": ["lava_ambient", "bridge_creak"]
+    }
+} 

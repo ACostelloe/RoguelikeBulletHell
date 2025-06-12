@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "name": "starting_forest",
+  "biome": "forest",
+  "zone_type": "start",
+  "width": 20,
+  "height": 15,
+  "tiles": [
+    {
+      "type": "platform_left_grass",
+      "x": 5,
+      "y": 10
+    },
+    {
+      "type": "platform_middle_grass",
+      "x": 6,
+      "y": 10
+    },
+    {
+      "type": "platform_right_grass",
+      "x": 7,
+      "y": 10
+    }
+  ],
+  "enemies": [],
+  "loot": [],
+  "decorations": []
+} 

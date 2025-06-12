@@ -1,24 +1,31 @@
 import pygame
 import math
 import random
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from game_platform import Platform
 from biome_generator import BiomeGenerator
 
 class LevelGenerator:
-    def __init__(self, width: int, height: int, seed: int = None):
+    def __init__(self, width: int, height: int, seed: int = None, overlays: Dict = None):
+        print("✅ [LG] Storing overlays", flush=True)
         self.width = width
         self.height = height
         self.seed = seed if seed is not None else random.randint(0, 1000000)
         random.seed(self.seed)
         
+        # Store overlay textures
+        self.overlays = overlays or {}
+        
+        print("✅ [LG] Creating BiomeGenerator", flush=True)
         # Initialize biome generator
         self.biome_generator = BiomeGenerator(width, height, self.seed)
         
+        print("✅ [LG] Initializing lists", flush=True)
         # Platform settings
-        self.platforms = pygame.sprite.Group()
+        self.platforms = []  # List of platform groups
         self.platform_types = ['normal', 'bouncy', 'slippery', 'breakable', 'damaging']
         
+        print("✅ [LG] Generating initial terrain", flush=True)
         # Generate initial terrain
         self._generate_initial_terrain()
 
@@ -27,12 +34,13 @@ class LevelGenerator:
         # Generate terrain for the first few chunks
         for x in range(0, min(1000, self.width)):
             platforms = self.biome_generator.generate_terrain(x)
+            platform_group = pygame.sprite.Group()
             for platform_data in platforms:
                 x, y, width, color, platform_type = platform_data
-                platform = Platform(x * 32, y * 32, width * 32, 32)
-                platform.platform_type = platform_type
-                platform.image.fill(color)
-                self.platforms.add(platform)
+                platform = Platform(x * 32, y * 32, width * 32, 32, platform_type, 
+                                 self.biome_generator.get_biome_at(x), self.overlays)
+                platform_group.add(platform)
+            self.platforms.append(platform_group)
 
     def update(self, camera_x: int):
         """Update the level by generating new terrain as the player moves."""
@@ -40,12 +48,13 @@ class LevelGenerator:
         future_x = int(camera_x + 1000)  # Generate 1000 pixels ahead
         if future_x < self.width:
             platforms = self.biome_generator.generate_terrain(future_x)
+            platform_group = pygame.sprite.Group()
             for platform_data in platforms:
                 x, y, width, color, platform_type = platform_data
-                platform = Platform(x * 32, y * 32, width * 32, 32)
-                platform.platform_type = platform_type
-                platform.image.fill(color)
-                self.platforms.add(platform)
+                platform = Platform(x * 32, y * 32, width * 32, 32, platform_type, 
+                                 self.biome_generator.get_biome_at(x), self.overlays)
+                platform_group.add(platform)
+            self.platforms.append(platform_group)
 
     def get_spawn_position(self, platforms) -> Tuple[int, int]:
         """Get a valid spawn position for the player on a random platform."""

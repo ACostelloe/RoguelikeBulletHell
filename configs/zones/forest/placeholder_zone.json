@@ -1,0 +1,13 @@
+{
+    "name": "Placeholder Zone",
+    "biome": "forest",
+    "zone_type": "start",
+    "tiles": [
+        ["grass", "grass", "grass"],
+        ["grass", "grass", "grass"],
+        ["grass", "grass", "grass"]
+    ],
+    "enemies": [],
+    "loot": [],
+    "decorations": []
+} 

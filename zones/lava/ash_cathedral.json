@@ -1,0 +1,85 @@
+{
+  "name": "ash_cathedral",
+  "biome": "lava",
+  "zone_type": "mid_game",
+  "width": 20,
+  "height": 15,
+  "tiles": [
+    {
+      "type": "LAVA_TILE",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "type": "LAVA_TILE",
+      "x": 1,
+      "y": 0
+    },
+    {
+      "type": "LAVA_TILE",
+      "x": 2,
+      "y": 0
+    },
+    {
+      "type": "platform_left_lava",
+      "x": 1,
+      "y": 1
+    },
+    {
+      "type": "platform_middle_lava",
+      "x": 2,
+      "y": 1
+    },
+    {
+      "type": "platform_right_lava",
+      "x": 3,
+      "y": 1
+    },
+    {
+      "type": "ASH_TILE",
+      "x": 2,
+      "y": 2
+    },
+    {
+      "type": "platform_left_magma",
+      "x": 1,
+      "y": 3
+    },
+    {
+      "type": "platform_middle_magma",
+      "x": 2,
+      "y": 3
+    },
+    {
+      "type": "platform_right_magma",
+      "x": 3,
+      "y": 3
+    }
+  ],
+  "enemies": [
+    {
+      "type": "fire_skull",
+      "x": 5,
+      "y": 3
+    },
+    {
+      "type": "ember_snake",
+      "x": 12,
+      "y": 3
+    }
+  ],
+  "loot": [
+    {
+      "type": "lava_heart",
+      "x": 10,
+      "y": 2
+    }
+  ],
+  "decorations": [
+    {
+      "type": "lava_statue",
+      "x": 8,
+      "y": 3
+    }
+  ]
+} 

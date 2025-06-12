@@ -1,0 +1,101 @@
+{
+    "name": "fallen_log_cave",
+    "biome": "forest",
+    "zone_type": "boss_zone",
+    "width": 20,
+    "height": 12,
+    "tiles": [
+        "LLLLLLLLLLLLLLLLLLLL",
+        "L..................L",
+        "L..######....######L",
+        "L..#....#....#....#L",
+        "L..######....######L",
+        "LLLLLLLLLLLLLLLLLLLL",
+        "L..................L",
+        "L..######....######L",
+        "L..#....#....#....#L",
+        "L..######....######L",
+        "L..................L",
+        "LLLLLLLLLLLLLLLLLLLL"
+    ],
+    "legend": {
+        ".": "air",
+        "#": "platform_moss",
+        "L": "log_wall"
+    },
+    "decorations": [
+        {
+            "type": "glowing_mushroom",
+            "x": 5,
+            "y": 3,
+            "properties": {
+                "size": "large",
+                "glow": true,
+                "color": "blue"
+            }
+        },
+        {
+            "type": "ancient_rune",
+            "x": 15,
+            "y": 3,
+            "properties": {
+                "active": true,
+                "glow": true
+            }
+        }
+    ],
+    "enemies": [
+        {
+            "type": "root_behemoth",
+            "x": 10,
+            "y": 3,
+            "patrol_points": [
+                [8, 3],
+                [12, 3],
+                [10, 2],
+                [10, 4]
+            ]
+        },
+        {
+            "type": "spore_sentinel",
+            "x": 5,
+            "y": 3,
+            "patrol_points": [
+                [3, 3],
+                [7, 3],
+                [5, 2],
+                [5, 4]
+            ]
+        }
+    ],
+    "loot": [
+        {
+            "type": "ancient_seed",
+            "rarity": "legendary",
+            "x": 10,
+            "y": 2
+        },
+        {
+            "type": "mystic_herb",
+            "rarity": "rare",
+            "x": 15,
+            "y": 3
+        }
+    ],
+    "events": [
+        "root_tremor",
+        "spore_burst"
+    ],
+    "transitions": [
+        {
+            "type": "exit_log",
+            "x": 19,
+            "y": 5,
+            "target": "glacier_ridge"
+        }
+    ],
+    "ambient_effects": {
+        "particles": ["spores", "glowing_particles"],
+        "sounds": ["cave_ambient", "root_groan"]
+    }
+} 

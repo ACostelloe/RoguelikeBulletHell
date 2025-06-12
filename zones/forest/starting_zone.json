@@ -1,0 +1,18 @@
+{
+    "biome": "forest",
+    "zone_type": "start",
+    "name": "starting_forest",
+    "tiles": [
+        ["G","G","G","G","G","G","G","G","G","G"],
+        ["G","G","G","G","G","G","G","G","G","G"],
+        ["G","G","G","G","G","G","G","G","G","G"],
+        ["G","G","G","G","G","G","G","G","G","G"],
+        ["G","G","G","G","G","G","G","G","G","G"]
+    ],
+    "enemies": [
+        {"type": "grunt", "x": 100, "y": 200},
+        {"type": "tank", "x": 300, "y": 400}
+    ],
+    "loot": [],
+    "decorations": []
+} 

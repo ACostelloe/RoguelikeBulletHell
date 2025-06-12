@@ -1,0 +1,39 @@
+{
+    "type": "early_game",
+    "width": 20,
+    "height": 12,
+    "biome": "forest",
+    "name": "root_valley",
+    "legend": {
+        ".": "air",
+        "t": "tree_trunk",
+        "p": "platform_grass",
+        "m": "mushroom",
+        "v": "vines"
+    },
+    "tiles": [
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "...ttttttttttttt....",
+        "...ppppppppppppp....",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "...................."
+    ],
+    "decorations": [
+        { "type": "mushroom", "x": 3, "y": 5 },
+        { "type": "vines", "x": 7, "y": 1 }
+    ],
+    "enemies": [
+        { "type": "wasp", "x": 10, "y": 3 }
+    ],
+    "loot": [
+        { "type": "herb", "x": 5, "y": 5 }
+    ],
+    "transitions": []
+} 

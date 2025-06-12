@@ -52,9 +52,6 @@ class TilesetManager:
                             (x * tile_width, y * tile_height, tile_width, tile_height))
         return None
 
-# Create global instance
-tileset_manager = TilesetManager()
-
 class VisualEffects:
     @staticmethod
     def apply_glow(surface, color, intensity):
@@ -102,9 +99,6 @@ class VisualEffects:
         
         return noisy
 
-# Create global instance
-visual_effects = VisualEffects()
-
 class BiomeVisuals:
     def __init__(self):
         self.biome_colors = {
@@ -143,5 +137,19 @@ class BiomeVisuals:
         
         return colored
 
-# Create global instance
-biome_visuals = BiomeVisuals() 
+def apply_tint(surface, color, strength=0.5):
+    """Apply a color tint to a surface."""
+    tint = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+    r, g, b = color
+    tint.fill((int(r * strength), int(g * strength), int(b * strength), 0))
+    tinted = surface.copy()
+    tinted.blit(tint, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+    return tinted
+
+def apply_overlay(surface, overlay_surface, alpha=128):
+    """Apply an overlay surface (e.g., cracks, glow) to a base surface."""
+    overlay = overlay_surface.copy()
+    overlay.set_alpha(alpha)
+    result = surface.copy()
+    result.blit(overlay, (0, 0))
+    return result 

@@ -1,15 +1,16 @@
 import pygame
 import random
 import math
-from visual_effects import tileset_manager, visual_effects, biome_visuals
+from visual_effects import visual_effects, biome_visuals, apply_tint, apply_overlay
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, platform_type='normal', biome_type='sand'):
+    def __init__(self, x, y, width, height, platform_type='normal', biome_type='grass', overlays=None):
         super().__init__()
         self.platform_type = platform_type
         self.biome_type = biome_type
         self.width = width
         self.height = height
+        self.overlays = overlays or {}
         
         # Create base surface
         self.image = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -17,31 +18,30 @@ class Platform(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         
-        # Load tileset if not already loaded
-        if 'platforms' not in tileset_manager.tilesets:
-            tileset_manager.load_tileset('platforms', 'assets/platform_tiles', 32, 32)
-            tileset_manager.create_tile_mapping('platforms', {
-                'left': 'left',
-                'middle': 'middle',
-                'right': 'right',
-                'single': 'single',
-                'left_damaged': 'left_damaged',
-                'middle_damaged': 'middle_damaged',
-                'right_damaged': 'right_damaged',
-                'left_ice': 'left_ice',
-                'middle_ice': 'middle_ice',
-                'right_ice': 'right_ice',
-                'left_grass': 'left_grass',
-                'middle_grass': 'middle_grass',
-                'right_grass': 'right_grass'
-            })
-        
         # Platform properties
         self.health = 100
         self.hit_flash = 0
         self.particles = []
         self.interaction_cooldown = 0
         self.effect_cooldown = 0
+        
+        # Biome-specific tint configurations
+        self.biome_tints = {
+            "forest": ((34, 139, 34), 0.3),  # Forest green tint
+            "lava": ((255, 69, 0), 0.4),     # Orange-red tint
+            "tech": ((70, 130, 180), 0.4),   # Steel blue tint
+            "ice": ((173, 216, 230), 0.4),   # Light blue tint
+            "grass": ((144, 238, 144), 0.2)  # Light green tint
+        }
+        
+        # Biome-specific overlay configurations
+        self.biome_overlay_types = {
+            "forest": None,
+            "lava": "cracks",
+            "tech": "glow",
+            "ice": "frost",
+            "grass": None
+        }
         
         # Platform effects
         self.bounce_power = 20
@@ -62,6 +62,24 @@ class Platform(pygame.sprite.Sprite):
         self.move_speed = 2
         self.move_range = 100
         
+        # Collapsing platform properties
+        self.collapse_time = 60
+        self.collapse_timer = 0
+        self.is_collapsing = False
+        
+        # Bouncy platform properties
+        self.bounce_cooldown = 30
+        self.bounce_timer = 0
+        
+        # Grapple boost platform properties
+        self.boost_duration = 180
+        self.boost_timer = 0
+        
+        # Spike platform properties
+        self.spike_damage = 10
+        self.spike_cooldown = 30
+        self.spike_timer = 0
+        
         # Visual properties
         self.is_win_platform = False
         self.border_width = 2
@@ -75,82 +93,59 @@ class Platform(pygame.sprite.Sprite):
         # Clear the surface
         self.image.fill((0, 0, 0, 0))
         
-        # Get biome colors
-        colors = biome_visuals.get_biome_colors(self.biome_type)
+        # Get base tiles based on platform type and biome
+        biome_suffix = f'_{self.biome_type}' if self.biome_type in ['grass', 'lava', 'tech', 'ice', 'forest'] else ''
+        type_suffix = '_damaged' if self.platform_type == 'damaging' else ''
         
-        # Draw base platform
+        # Draw the base platform
         if self.width <= 32:
             # Single tile platform
-            tile_name = 'single'
-            if self.platform_type == 'damaging':
-                tile_name = 'middle_damaged'
-            elif self.biome_type == 'ice':
-                tile_name = 'middle_ice'
-            elif self.biome_type == 'grass':
-                tile_name = 'middle_grass'
-            
-            tile = tileset_manager.get_tile('platforms', tile_name)
+            tile_name = f'single{type_suffix or biome_suffix}'
+            tile = None  # TODO: Replace with new tile system
+            if not tile and biome_suffix:
+                tile = None  # TODO: Replace with new tile system
+            if not tile:
+                tile = None  # TODO: Replace with new tile system
             if tile:
                 self.image.blit(tile, (0, 0))
         else:
             # Multi-tile platform
             # Left edge
-            left_tile_name = 'left'
-            if self.platform_type == 'damaging':
-                left_tile_name = 'left_damaged'
-            elif self.biome_type == 'ice':
-                left_tile_name = 'left_ice'
-            elif self.biome_type == 'grass':
-                left_tile_name = 'left_grass'
-            
-            left_tile = tileset_manager.get_tile('platforms', left_tile_name)
+            left_tile = self._get_platform_tile('left', type_suffix, biome_suffix)
             if left_tile:
                 self.image.blit(left_tile, (0, 0))
             
             # Middle tiles
-            middle_tile_name = 'middle'
-            if self.platform_type == 'damaging':
-                middle_tile_name = 'middle_damaged'
-            elif self.biome_type == 'ice':
-                middle_tile_name = 'middle_ice'
-            elif self.biome_type == 'grass':
-                middle_tile_name = 'middle_grass'
-            
-            middle_tile = tileset_manager.get_tile('platforms', middle_tile_name)
+            middle_tile = self._get_platform_tile('middle', type_suffix, biome_suffix)
             if middle_tile:
                 for x in range(32, self.width - 32, 32):
                     self.image.blit(middle_tile, (x, 0))
             
             # Right edge
-            right_tile_name = 'right'
-            if self.platform_type == 'damaging':
-                right_tile_name = 'right_damaged'
-            elif self.biome_type == 'ice':
-                right_tile_name = 'right_ice'
-            elif self.biome_type == 'grass':
-                right_tile_name = 'right_grass'
-            
-            right_tile = tileset_manager.get_tile('platforms', right_tile_name)
+            right_tile = self._get_platform_tile('right', type_suffix, biome_suffix)
             if right_tile:
                 self.image.blit(right_tile, (self.width - 32, 0))
         
-        # Apply biome colors
-        self.image = biome_visuals.apply_biome_colors(self.image, self.biome_type)
+        # Apply biome-specific effects
+        if self.biome_type in self.biome_tints:
+            tint_color, tint_strength = self.biome_tints[self.biome_type]
+            self.image = apply_tint(self.image, tint_color, tint_strength)
         
-        # Apply platform type effects
-        if self.platform_type == 'moving':
-            # Add movement indicator
-            glow = visual_effects.apply_glow(self.image, colors['highlight'], 50)
-            self.image.blit(glow, (0, 0))
-        elif self.platform_type == 'collapsing':
-            # Add cracking effect
-            self.image = visual_effects.apply_distortion(self.image, 0.05)
-        elif self.platform_type == 'grapple_boost':
-            # Add magical effect
-            glow = visual_effects.apply_glow(self.image, (255, 215, 0), 75)
-            self.image.blit(glow, (0, 0))
-            self.image = visual_effects.apply_noise(self.image, 0.1)
-            
+        # Apply biome-specific overlay
+        overlay_type = self.biome_overlay_types.get(self.biome_type)
+        if overlay_type and overlay_type in self.overlays:
+            self.image = apply_overlay(self.image, self.overlays[overlay_type], alpha=150)
+
+    def _get_platform_tile(self, position, type_suffix, biome_suffix):
+        """Helper method to get platform tiles with fallback options."""
+        tile_name = f'{position}{type_suffix or biome_suffix}'
+        tile = None  # TODO: Replace with new tile system
+        if not tile and biome_suffix:
+            tile = None  # TODO: Replace with new tile system
+        if not tile:
+            tile = None  # TODO: Replace with new tile system
+        return tile
+
     def update_appearance(self):
         """Update the platform's visual appearance based on its type."""
         self._draw_platform()
@@ -179,6 +174,27 @@ class Platform(pygame.sprite.Sprite):
         if self.platform_type == 'moving':
             self.rect.y = self.original_pos[1] + math.sin(pygame.time.get_ticks() * 0.001 * self.move_speed) * self.move_range
         
+        # Update collapsing platform
+        if self.platform_type == 'collapsing' and self.is_collapsing:
+            self.collapse_timer += 1
+            if self.collapse_timer >= self.collapse_time:
+                self.kill()
+        
+        # Update bouncy platform
+        if self.platform_type == 'bouncy':
+            if self.bounce_timer > 0:
+                self.bounce_timer -= 1
+        
+        # Update grapple boost platform
+        if self.platform_type == 'grapple_boost':
+            if self.boost_timer > 0:
+                self.boost_timer -= 1
+        
+        # Update spike platform
+        if self.platform_type == 'spike':
+            if self.spike_timer > 0:
+                self.spike_timer -= 1
+        
         # Update particles
         for particle in self.particles[:]:
             particle['life'] -= 1
@@ -198,99 +214,32 @@ class Platform(pygame.sprite.Sprite):
 
     def handle_collision(self, player):
         """Handle collision with player."""
-        if self.interaction_cooldown > 0:
-            return
-        
-        if self.platform_type == 'breakable' and player.vel_y > 0:
-            self.health -= 20
-            self.hit_flash = 10
-            self.add_particles(5)
-            if self.health <= 0:
-                self.kill()
-        
-        elif self.platform_type == 'bouncy' and player.vel_y > 0:
-            player.vel_y = -self.bounce_power
-            self.add_particles(3)
-            self.interaction_cooldown = 30
-        
-        elif self.platform_type == 'slippery':
-            player.vel_x *= 1.1
-        
-        elif self.platform_type == 'damaging' and player.vel_y > 0:
-            player.take_damage(1)
-            self.add_particles(2)
-            self.interaction_cooldown = 60
-            
-        elif self.platform_type == 'speed_boost' and self.effect_cooldown <= 0:
-            player.move_speed *= self.speed_multiplier
-            self.effect_cooldown = self.effect_duration
-            self.add_particles(3)
-            
-        elif self.platform_type == 'jump_boost' and self.effect_cooldown <= 0:
-            player.jump_power *= self.jump_multiplier
-            self.effect_cooldown = self.effect_duration
-            self.add_particles(3)
-            
-        elif self.platform_type == 'healing' and self.effect_cooldown <= 0:
-            player.health = min(player.health + self.heal_amount, player.stats.max_health)
-            self.effect_cooldown = self.heal_cooldown
-            self.add_particles(3)
-            
-        elif self.platform_type == 'shield' and self.effect_cooldown <= 0:
-            player.invincible = True
-            player.invincibility_timer = self.shield_duration
-            self.effect_cooldown = self.effect_duration
-            self.add_particles(3)
-            
-        elif self.platform_type == 'time_slow' and self.effect_cooldown <= 0:
-            # Slow down all enemies
-            for enemy in player.game.enemies:
-                enemy.speed *= self.slow_factor
-            self.effect_cooldown = self.effect_duration
-            self.add_particles(3)
-            
-        elif self.platform_type == 'double_damage' and self.effect_cooldown <= 0:
-            player.bullet_damage *= self.damage_multiplier
-            self.effect_cooldown = self.effect_duration
-            self.add_particles(3)
+        if self.platform_type == 'damaging':
+            player.take_damage(10)
+        elif self.platform_type == 'bouncy' and self.bounce_timer <= 0:
+            player.velocity_y = -self.bounce_power
+            self.bounce_timer = self.bounce_cooldown
+        elif self.platform_type == 'grapple_boost' and self.boost_timer <= 0:
+            player.grapple_multiplier = self.grapple_multiplier
+            self.boost_timer = self.boost_duration
+        elif self.platform_type == 'spike' and self.spike_timer <= 0:
+            player.take_damage(self.spike_damage)
+            self.spike_timer = self.spike_cooldown
+        elif self.platform_type == 'collapsing' and not self.is_collapsing:
+            self.is_collapsing = True
+            self.collapse_timer = 0
 
     def handle_grapple(self, player):
-        """Handle grapple interaction with platform."""
+        """Handle grappling hook interaction."""
         if self.platform_type == 'grapple_boost':
-            player.hook_range *= self.grapple_multiplier
-            self.effect_cooldown = self.effect_duration
-            self.add_particles(3)
-            
-        elif self.platform_type == 'grapple_repel':
-            dx = player.rect.centerx - self.rect.centerx
-            dy = player.rect.centery - self.rect.centery
-            length = math.sqrt(dx * dx + dy * dy)
-            if length > 0:
-                player.vel_x += (dx / length) * self.repel_force
-                player.vel_y += (dy / length) * self.repel_force
-            self.add_particles(3)
-            
-        elif self.platform_type == 'grapple_cooldown':
-            player.hook_cooldown = self.cooldown_time
-            self.add_particles(2)
-            
-        elif self.platform_type == 'grapple_break':
-            if random.random() < self.break_chance:
-                player.hook_active = False
-                player.hook_cooldown = self.cooldown_time
-                self.add_particles(5)
+            player.grapple_multiplier = self.grapple_multiplier
+            self.boost_timer = self.boost_duration
+        elif self.platform_type == 'damaging':
+            player.take_damage(5)
 
     def draw(self, screen, camera_x, camera_y):
-        """Draw the platform and its particles."""
-        # Draw platform
-        screen_x = self.rect.x - camera_x
-        screen_y = self.rect.y - camera_y
-        screen.blit(self.image, (screen_x, screen_y))
-        
-        # Draw particles
+        """Draw the platform and its effects."""
+        screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
         for particle in self.particles:
-            alpha = int((particle['life'] / 30) * 255)
-            color = (*particle['color'][:3], alpha)
-            pos_x = particle['pos'][0] - camera_x
-            pos_y = particle['pos'][1] - camera_y
-            pygame.draw.circle(screen, color, (int(pos_x), int(pos_y)), 2) 
+            pygame.draw.circle(screen, particle['color'], 
+                             (int(particle['pos'][0] - camera_x), int(particle['pos'][1] - camera_y)), 2) 

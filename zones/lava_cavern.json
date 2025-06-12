@@ -1,0 +1,83 @@
+{
+    "name": "lava_cavern",
+    "biome": "lava",
+    "width": 20,
+    "height": 12,
+    "tiles": [
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "....................",
+        "####################",
+        "####################"
+    ],
+    "legend": {
+        ".": "air",
+        "#": "platform_middle",
+        "P": "platform_glow",
+        "T": "tech_tower"
+    },
+    "decorations": [
+        {
+            "type": "glow_node",
+            "x": 6,
+            "y": 4,
+            "properties": {
+                "intensity": 0.8,
+                "color": "blue"
+            }
+        },
+        {
+            "type": "cable_bundle",
+            "x": 12,
+            "y": 5,
+            "properties": {
+                "damage": 0.1,
+                "sparks": true
+            }
+        }
+    ],
+    "enemies": [
+        {
+            "type": "drone",
+            "x": 5,
+            "y": 3,
+            "patrol_points": [
+                [4, 3],
+                [6, 3],
+                [5, 4]
+            ]
+        },
+        {
+            "type": "turret",
+            "x": 15,
+            "y": 8
+        }
+    ],
+    "loot": [
+        {
+            "rarity": "rare",
+            "x": 10,
+            "y": 2,
+            "type": "artifact"
+        },
+        {
+            "rarity": "common",
+            "x": 3,
+            "y": 10,
+            "type": "scrap"
+        }
+    ],
+    "events": [
+        "power_surge",
+        "zone_collapse"
+    ],
+    "spawn_zone": false,
+    "transition_type": "elevator"
+} 
